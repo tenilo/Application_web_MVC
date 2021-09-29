@@ -1,0 +1,58 @@
+﻿
+
+@{
+    ViewBag.Title = "Liste";
+}
+
+@using GridMvc.Html
+@model IEnumerable<DAL3.Personne>
+
+<h2>Liste</h2>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('.btn-delete-personne').click(function (event) {
+                var boutonClique = event.target;
+                var idASupprimer = $(boutonClique).attr('data-id');
+                alert(idASupprimer)
+
+                $.ajax({
+                    url: '@Url.Action("Delete")',
+                    type: 'POST',
+                    data: { id: idASupprimer },
+                    success: function (data) {
+                        if (data.Suppression == "OK") {
+                            $(boutonClique).closest("tr").fadeOut(400, function () {
+                                $(this).remove();
+                            })
+                        }
+                    }
+                })
+
+            });
+        });
+    </script>
+}
+
+@Html.Grid(Model).Columns(columns =>
+{
+    columns.Add(p => p.Nom)
+      .Filterable(true);
+    columns.Add(p => p.Email)
+      .Filterable(true);
+    columns.Add(p => p.Age)
+      .Sortable(true);
+    /* ajout de la colonne permettant de naviguer depuis notre liste vers le
+    formulaire d'édition*/
+    columns.Add()
+       .Sanitized(false) // pas d'assainissement
+       .Encoded(false) // pas d'encodage
+       .RenderValueAs(p => Html.ActionLink("Editer", "Edit", new { id = p.ID }));
+
+    columns.Add()
+       .Sanitized(false) // pas d'assainissement
+       .Encoded(false) // pas d'encodage
+       .RenderValueAs(p => "<button class='btn btn-default btn-delete-pesonne' data-id='" + p.ID +"'> <span class='glyphicon glyphicon-remove'/> </button>");
+})
+
